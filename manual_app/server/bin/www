@@ -7,7 +7,7 @@
 var app = require('../app');
 var sockets_config = require("../sockets_config")
 var debug = require('debug')('manual-app:server');
-var https = require('https');
+var http = require('http');
 var fs = require('fs');
 const { Server } = require("socket.io");
 var appRouter = require('../routes/routes');
@@ -23,13 +23,7 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-var privateKey = fs.readFileSync( __dirname + '/certificate/selfsigned.key' );
-var certificate = fs.readFileSync( __dirname + '/certificate/selfsigned.crt' );
-
-var server = https.createServer({
-    key: privateKey,
-    cert: certificate
-}, app);
+var server = http.createServer(app);
 
 
 const io = new Server(server);

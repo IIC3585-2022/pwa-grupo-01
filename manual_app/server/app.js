@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(function(req, res, next) {
-    res.header("Service-Worker-Allowed", "https://localhost:3000/");
+    res.header("Service-Worker-Allowed", "/");
     next();
 })
 app.use(express.static(path.join(__dirname, 'public')));
