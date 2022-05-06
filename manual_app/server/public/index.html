@@ -1,0 +1,32 @@
+<html>
+
+<head>
+  <title>Express</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+
+<body>
+  <h1>Express</h1>
+  <p>Welcome to Express</p>
+  <img src="/images/very_large_image.jpg" style="width: 100%"></img>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+    socket.on('message', (msg) => {
+      console.log(msg);
+    })
+    const registerServiceWorker = async () => {
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.register(
+          '/javascripts/sw.js',
+          {
+            scope: "/"
+          }
+        );
+      }
+    }
+    registerServiceWorker();
+  </script>
+</body>
+
+</html>
