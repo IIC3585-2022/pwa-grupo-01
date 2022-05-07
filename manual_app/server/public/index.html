@@ -10,29 +10,76 @@
   <link rel="apple-touch-icon" href="/images/icons/icon-128x128.png">
   
   <link rel="stylesheet" href="/stylesheets/style.css">
+  <style>
+    .left-notification-button {
+      float: left; border: 0; background-color: #247ebf; color: white; padding: 15px;
+    }
+    .left-notification-button:hover {
+      cursor: pointer;
+    }
+
+    .right-notification-button {
+      float: right; border: 0; background-color: white; color: #247ebf; padding: 15px;
+    }
+    .right-notification-button:hover {
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>Express</h1>
-  <p>Welcome to Express</p>
-  <img src="/images/very_large_image.jpg" style="width: 100%"></img>
+    <div style="top: 0; left: 0; right: 0; position: fixed;">
+      <div id="notification-prompt" style="width: 500px; padding: 1.286em; box-sizing: border-box; max-width: 100%; margin: 0 auto; display: none">
+        <div style="box-sizing: border-box; position: relative; overflow:auto; background-color: white">
+          <img src="/images/icons/icon-64x64.png" style="float: left">
+          <div style="float: left; font-size: 16px; padding-left: 10px;">Desea recibir notificaciones?</div>
+        </div>
+        <div style="overflow: auto">
+          <button class="left-notification-button" onclick="setupPushNotifications()">Si</button>
+          <button class="right-notification-button" onclick="disableNotificationPermission()">No</button>
+        </div>
+      </div>
+    </div>
+    <h1>Express</h1>
+    <p>Welcome to Express</p>
+    <img src="/images/very_large_image.jpg" style="width: 100%"></img>
+    <input id="news-title">
+    <input id="news-body">
+    <button onclick="sendNew()">Enviar noticia</button>
   <script src="/socket.io/socket.io.js"></script>
+  <script src="javascripts/setup-sw.js"></script>
+  <script src="javascripts/request-notifications.js"></script>
+  <script src="javascripts/configure-push-subscriptions.js"></script>
   <script>
-    var socket = io();
-    socket.on('message', (msg) => {
-      console.log(msg);
-    })
-    const registerServiceWorker = async () => {
-      if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.register(
-          '/javascripts/sw.js',
-          {
-            scope: "/"
-          }
-        );
-      }
+        
+    if(Notification.permission === "default" && localStorage.getItem("notification-permission") !== "false") {
+      console.log(Notification.permission)
+      console.log(localStorage.getItem("notification-permission"))
+      document.getElementById("notification-prompt").style.display = "";
     }
+    var socket = io();
+    socket.on('news', (msg) => {
+      const { title, body } = msg;
+      console.log(title, body)
+    })
+    function sendNew() {
+      const titleInput = document.getElementById("news-title");
+      const bodyInput = document.getElementById("news-body");
+      if(!titleInput.value || !bodyInput.value) return;
+      console.log("sendfing")
+      socket.emit("news", {title: titleInput.value, body: bodyInput.value});
+    }
+
     registerServiceWorker();
+
+    function setupPushNotifications() {
+      requestNotificationPermission().then(function(){
+        if(Notification.permission === "granted") {
+          configurePushSubscription();
+        }
+      })
+    }
+
   </script>
 </body>
 

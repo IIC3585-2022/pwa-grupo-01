@@ -15,16 +15,32 @@ self.addEventListener("install", (event) => {
   );
 });
 self.addEventListener('fetch', function(event) {
-  event.respondWith(
-    fetch(event.request)
-      .then(function(response){
-        caches.open(CACHE_NAME).then(function (cache){
-          cache.put(event.request, response.clone());
-        });
-        return response;
-      })
-      .catch(function() {
-        return caches.match(event.request);
-      })
+  if(event.request.method === "GET")
+  {
+    event.respondWith(
+      fetch(event.request)
+        .then(function(response){
+          const cloned = response.clone();
+          caches.open(CACHE_NAME).then(function (cache){
+            cache.put(event.request, cloned.clone());
+          });
+          return response;
+        })
+        .catch(function() {
+          return caches.match(event.request);
+        })
+    );
+  } else {
+    event.respondWith(
+      fetch(event.request)
+    );
+  }
+});
+
+self.addEventListener('push', function(e) {
+  const {title, body} = JSON.parse(e.data.text());
+  console.log(title, body);
+  e.waitUntil(
+    self.registration.showNotification(title, {body: body})
   );
 });

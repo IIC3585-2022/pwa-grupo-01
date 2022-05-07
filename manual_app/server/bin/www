@@ -3,9 +3,10 @@
 /**
  * Module dependencies.
  */
-
+require('dotenv').config();
 var app = require('../app');
 var sockets_config = require("../sockets_config")
+var push_notifications_config = require("../push_notifications_config");
 var debug = require('debug')('manual-app:server');
 var http = require('http');
 var fs = require('fs');
@@ -28,7 +29,8 @@ var server = http.createServer(app);
 
 const io = new Server(server);
 
-sockets_config(app, io);
+const webpush = push_notifications_config(app);
+sockets_config(app, io, webpush);
 
 app.use('/', appRouter);
 
