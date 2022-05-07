@@ -8,18 +8,22 @@
   <meta name="theme-color" content="red">
   <link rel="icon" type="image/x-icon" href="/images/icons/icon-32x32.png">
   <link rel="apple-touch-icon" href="/images/icons/icon-128x128.png">
-  
-  <link rel="stylesheet" href="/stylesheets/style.css">
+  <title>PWA News</title>
+  <link rel="stylesheet" href="/stylesheets/styles.css">
+  <link rel="stylesheet" href="/stylesheets/materialize.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <script type="text/javascript" src="/javascripts/materialize.min.js"></script>
   <style>
     .left-notification-button {
-      float: left; border: 0; background-color: #247ebf; color: white; padding: 15px;
+      float: left; border: 0; background-color: #247ebf; color: white; padding: 10px 15px; border-radius: 10px;
     }
     .left-notification-button:hover {
       cursor: pointer;
     }
 
     .right-notification-button {
-      float: right; border: 0; background-color: white; color: #247ebf; padding: 15px;
+      float: right; border: 0; background-color: transparent; color: #247ebf; padding: 10px 15px; border-radius: 10px;
     }
     .right-notification-button:hover {
       cursor: pointer;
@@ -27,29 +31,73 @@
   </style>
 </head>
 
-<body>
-    <div style="top: 0; left: 0; right: 0; position: fixed;">
-      <div id="notification-prompt" style="width: 500px; padding: 1.286em; box-sizing: border-box; max-width: 100%; margin: 0 auto; display: none">
-        <div style="box-sizing: border-box; position: relative; overflow:auto; background-color: white">
-          <img src="/images/icons/icon-64x64.png" style="float: left">
-          <div style="float: left; font-size: 16px; padding-left: 10px;">Desea recibir notificaciones?</div>
-        </div>
-        <div style="overflow: auto">
-          <button class="left-notification-button" onclick="setupPushNotifications()">Si</button>
-          <button class="right-notification-button" onclick="disableNotificationPermission()">No</button>
-        </div>
+<body class="grey lighten-4">
+  <div style="top: 0; left: 0; right: 0; position: fixed;">
+    <div id="notification-prompt" style="width: 500px; padding: 1.286em; box-sizing: border-box; max-width: 100%; margin: 0 auto; display: none; background-color: white">
+      <div style="box-sizing: border-box; position: relative; overflow:auto">
+        <img src="/images/icons/icon-64x64.png" style="float: left">
+        <div style="float: left; font-size: 16px; padding-left: 10px;">Desea recibir notificaciones?</div>
+      </div>
+      <div style="overflow: auto; margin-top: 10px">
+        <button class="left-notification-button" onclick="setupPushNotifications()">Si</button>
+        <button class="right-notification-button" onclick="disableNotificationPermission()">No</button>
       </div>
     </div>
-    <h1>Express</h1>
-    <p>Welcome to Express</p>
-    <img src="/images/very_large_image.jpg" style="width: 100%"></img>
-    <input id="news-title">
-    <input id="news-body">
-    <button onclick="sendNew()">Enviar noticia</button>
+  </div>
+  <nav class="z-depth-0">
+    <div class="nav-wrapper container">
+      <a href="/">PWA<span>News</span></a>
+      <span class="right grey-text text-darken-1">
+        <i class="material-icons sidenav-trigger" data-target="side-menu">menu</i>
+      </span>
+    </div>
+  </nav>
+
+  <!-- side nav -->
+  <ul id="side-menu" class="sidenav side-menu">
+    <li><a class="subheader">PWA NEWS</a></li>
+    <li><a href="/" class="waves-effect">Home</a></li>
+    <li><a href="/pages/about.html" class="waves-effect">Sobre PWA News</a></li>
+    <li><div class="divider"></div></li>
+  </ul>
+
+  <!-- news -->
+  <div class="news container grey-text text-darken-1">
+    <h6 class="center">Noticias</h6>
+  </div>
+
+  <div class="center">
+    <a class="btn-floating btn-small btn-large add-btn sidenav-trigger" data-target="side-form">
+      <i class="material-icons">add</i>
+    </a>
+  </div>
+
+  <!-- add news side nav -->
+  <div id="side-form" class="sidenav side-form">
+    <form class="add-news container section">
+      <h6 >Añadir Noticia</h6>
+      <div class="divider"></div>
+      <div class="input-field">
+        <input placeholder="Farkas lo pierde todo" id="title" type="text" class="validate">
+        <label for="title">Titulo</label>
+      </div>
+      <div class="input-field">
+        <textarea placeholder="Cuerpo de la noticia" id="body" class="validate materialize-textarea" data-length="120"></textarea>
+        <label for="body">Cuerpo</label>
+      </div>
+      <div class="input-field center">
+        <button class="btn-small">Agregar</button>
+      </div>
+    </form>
+  </div>
   <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+  </script>
   <script src="javascripts/setup-sw.js"></script>
   <script src="javascripts/request-notifications.js"></script>
   <script src="javascripts/configure-push-subscriptions.js"></script>
+  <script src="javascripts/check_existing_news.js"></script>
   <script>
         
     if(Notification.permission === "default" && localStorage.getItem("notification-permission") !== "false") {
@@ -57,18 +105,10 @@
       console.log(localStorage.getItem("notification-permission"))
       document.getElementById("notification-prompt").style.display = "";
     }
-    var socket = io();
     socket.on('news', (msg) => {
       const { title, body } = msg;
       console.log(title, body)
     })
-    function sendNew() {
-      const titleInput = document.getElementById("news-title");
-      const bodyInput = document.getElementById("news-body");
-      if(!titleInput.value || !bodyInput.value) return;
-      console.log("sendfing")
-      socket.emit("news", {title: titleInput.value, body: bodyInput.value});
-    }
 
     registerServiceWorker();
 
@@ -79,7 +119,16 @@
         }
       })
     }
+    const news = document.querySelector('.news');
 
+    document.addEventListener('DOMContentLoaded', function() {
+      // nav menu
+      const menus = document.querySelectorAll('.side-menu');
+      M.Sidenav.init(menus, {edge: 'right'});
+      // add news form
+      const forms = document.querySelectorAll('.side-form');
+      M.Sidenav.init(forms, {edge: 'left'});
+    });
   </script>
 </body>
 

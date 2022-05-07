@@ -6,6 +6,7 @@ const addResourcesToCache = async (resources) => {
 };
 
 self.addEventListener("install", (event) => {
+  self.skipWaiting()
   event.waitUntil(
     addResourcesToCache([
       "/images/very_large_image.jpg",
